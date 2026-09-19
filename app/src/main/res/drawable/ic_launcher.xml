@@ -9,7 +9,7 @@
         android:fillColor="#0F172A"
         android:pathData="M0,0h108v108h-108z" />
 
-    <!-- Top dots: ... -->
+    <!-- Top dots -->
     <path
         android:fillColor="#F59E0B"
         android:pathData="M24,18a8,8 0 1,0 16,0a8,8 0 1,0 -16,0" />
