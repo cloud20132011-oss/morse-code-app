@@ -23,8 +23,13 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      - name: 🤖 Android SDK opzetten
-        uses: android-actions/setup-android@v3
+      - name: 🤖 Android SDK voorbereiden (zit al op de runner)
+        run: |
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls "$ANDROID_SDK_ROOT"
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
       - name: 🐘 Gradle opzetten
         uses: gradle/actions/setup-gradle@v3
