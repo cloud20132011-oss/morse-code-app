@@ -20,6 +20,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -60,6 +61,7 @@ private fun makeQuestion(): Question {
     return Question(answer, (distractors + answer).shuffled())
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuizScreen(strings: AppStrings, player: MorsePlayer, wpm: Int) {
     val context = LocalContext.current

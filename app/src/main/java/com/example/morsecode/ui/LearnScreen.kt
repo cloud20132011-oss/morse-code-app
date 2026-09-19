@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,6 +41,7 @@ import com.example.morsecode.audio.MorsePlayer
 import com.example.morsecode.data.AppStrings
 import com.example.morsecode.data.MorseCode
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LearnScreen(
     strings: AppStrings,
