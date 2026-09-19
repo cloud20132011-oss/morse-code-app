@@ -20,7 +20,7 @@
         android:fillColor="#F59E0B"
         android:pathData="M68,18a8,8 0 1,0 16,0a8,8 0 1,0 -16,0" />
 
-    <!-- Middle dashes: --- -->
+    <!-- Middle dashes SOS -->
     <path
         android:fillColor="#F59E0B"
         android:pathData="M14,46h24v12h-24z" />
