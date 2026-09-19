@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📻 Morse Leren — Probeerversie (zelfde functies als de app)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: #0F172A; color: #F8FAFC; min-height: 100vh; }
+  header { background: #1E293B; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; border-bottom: 2px solid #F59E0B; }
+  header h1 { font-size: 1.15rem; }
+  header h1 small { display: block; font-size: .72rem; color: #94A3B8; font-weight: normal; }
+  .lang button { background: #243349; color: #94A3B8; border: 1px solid #334155; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+  .lang button.active { background: #F59E0B; color: #000; border-color: #F59E0B; }
+  main { max-width: 640px; margin: 0 auto; padding: 16px 16px 100px; }
+  nav.tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  nav.tabs button { flex: 1; padding: 12px 4px; border-radius: 12px; border: 1px solid #334155; background: #1E293B; color: #F8FAFC; font-size: .85rem; font-weight: 600; cursor: pointer; }
+  nav.tabs button.active { background: #F59E0B; color: #000; border-color: #F59E0B; }
+  .card { background: #1E293B; border-radius: 14px; padding: 16px; margin-bottom: 12px; border: 1px solid #2b3b55; }
+  .card.amber { background: #B45309; border-color: #F59E0B; color: #fff; }
+  .card h2 { font-size: 1.05rem; margin-bottom: 6px; }
+  .card p.sub { color: #94A3B8; font-size: .85rem; margin-bottom: 8px; }
+  .card.amber p.sub { color: #FEF3C7; }
+  .morse-big { font-size: 1.6rem; font-weight: 900; letter-spacing: 3px; color: #F59E0B; }
+  .card.amber .morse-big { color: #fff; }
+  .btn { background: #F59E0B; color: #000; border: none; border-radius: 10px; padding: 10px 16px; font-weight: bold; cursor: pointer; font-size: .9rem; }
+  .btn.ghost { background: transparent; border: 1px solid #F59E0B; color: #F59E0B; }
+  .btn.block { width: 100%; margin-top: 8px; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .cell { background: #243349; border: 1px solid #334155; border-radius: 12px; padding: 10px 4px; text-align: center; cursor: pointer; }
+  .cell:hover { border-color: #F59E0B; }
+  .cell.playing { background: #F59E0B; color: #000; border-color: #F59E0B; }
+  .cell .ch { font-size: 1.4rem; font-weight: 800; }
+  .cell .mo { font-size: .85rem; font-weight: 700; color: #F59E0B; }
+  .cell.playing .mo { color: #000; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+  .chips button { background: #243349; color: #F8FAFC; border: 1px solid #334155; border-radius: 20px; padding: 6px 14px; cursor: pointer; font-size: .8rem; }
+  .chips button.active { background: #F59E0B; color: #000; border-color: #F59E0B; font-weight: bold; }
+  textarea, input[type=text] { width: 100%; background: #0F172A; color: #F8FAFC; border: 1px solid #334155; border-radius: 10px; padding: 12px; font-size: 1rem; font-family: inherit; }
+  textarea:focus, input:focus { outline: 2px solid #F59E0B; }
+  .out { background: #0F172A; border-radius: 10px; padding: 14px; font-size: 1.15rem; font-weight: 700; letter-spacing: 1px; word-break: break-word; min-height: 58px; }
+  input[type=range] { width: 100%; accent-color: #F59E0B; }
+  .opt { flex: 1 1 45%; background: #243349; border: 1px solid #334155; color: #F8FAFC; border-radius: 12px; padding: 16px 8px; font-size: 1.1rem; font-weight: 800; cursor: pointer; }
+  .opt.good { background: #22C55E; color: #000; border-color: #22C55E; }
+  .opt.bad { background: #EF4444; color: #fff; border-color: #EF4444; }
+  .flash { background: #0F172A; border-radius: 12px; padding: 34px 16px; text-align: center; cursor: pointer; border: 2px dashed #334155; }
+  .flash .big { font-size: 3.5rem; font-weight: 900; }
+  .quiz-q { font-size: 3rem; font-weight: 900; text-align: center; padding: 10px; }
+  .quiz-q.small { font-size: 2rem; color: #F59E0B; letter-spacing: 3px; }
+  .progress { height: 8px; background: #243349; border-radius: 6px; overflow: hidden; margin: 8px 0; }
+  .progress div { height: 100%; background: #F59E0B; }
+  .feedback { font-weight: 700; margin: 8px 0; }
+  .feedback.good { color: #22C55E; } .feedback.bad { color: #EF4444; }
+  footer { text-align: center; color: #64748B; font-size: .75rem; padding: 20px; }
+  .hidden { display: none; }
+  .lamp { width: 46px; height: 46px; border-radius: 50%; background: #243349; border: 2px solid #334155; margin: 4px auto; transition: background .05s; }
+  .lamp.on { background: #F59E0B; border-color: #F59E0B; box-shadow: 0 0 24px #F59E0B; }
+</style>
+</head>
+<body>
+<header>
+  <h1>📻 <span id="t-app">Morse Leren</span><small id="t-sub">Probeerversie — dezelfde functies als de Android-app</small></h1>
+  <div class="lang"><button id="b-nl" class="active" onclick="setLang('nl')">NL</button> <button id="b-en" onclick="setLang('en')">EN</button></div>
+</header>
+<main>
+  <nav class="tabs">
+    <button id="tab0" class="active" onclick="tab(0)">📖 <span id="t-tab0">Leren</span></button>
+    <button id="tab1" onclick="tab(1)">🔁 <span id="t-tab1">Vertaler</span></button>
+    <button id="tab2" onclick="tab(2)">🎯 <span id="t-tab2">Quiz</span></button>
+  </nav>
+
+  <!-- LEREN -->
+  <section id="s0">
+    <div class="card amber">
+      <h2>🆘 SOS — ... --- ...</h2>
+      <p class="sub" id="t-sos">3 kort, 3 lang, 3 kort. Het bekendste morsesignaal ter wereld.</p>
+      <div class="lamp" id="lamp"></div>
+      <button class="btn" style="background:#fff" onclick="playMorse('... --- ...')">▶ <span class="t-play">Afspelen</span></button>
+      <button class="btn ghost" style="border-color:#fff;color:#fff" onclick="stopPlay()">⏹ Stop</button>
+    </div>
+    <div class="card">
+      <h2>🎚 <span class="t-speed">Snelheid</span>: <span id="wpm0">18</span> WPM</h2>
+      <input type="range" min="5" max="30" value="18" oninput="setWpm(this.value)">
+    </div>
+    <div class="card">
+      <h2>📖 <span class="t-alpha">Alfabet — tik om te horen</span></h2>
+      <div class="chips" id="filters">
+        <button class="active" onclick="filter('all',this)" data-f="all">Alles</button>
+        <button onclick="filter('L',this)" data-f="L">Letters</button>
+        <button onclick="filter('N',this)" data-f="N">123</button>
+        <button onclick="filter('P',this)" data-f="P">?!@</button>
+      </div>
+      <div class="grid3" id="grid"></div>
+    </div>
+    <div class="card">
+      <h2>🎴 Flashcards</h2>
+      <div class="flash" onclick="flip()"><div class="big" id="fc">A</div><div class="morse-big" id="fc-m"></div></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn ghost" onclick="flip()">👁 <span class="t-show">Toon</span></button>
+        <button class="btn ghost" onclick="playMorse(cur[1])">🔊</button>
+        <button class="btn" onclick="nextFc()">⏭</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- VERTALER -->
+  <section id="s1" class="hidden">
+    <div class="card">
+      <h2>🔁 <span class="t-trans">Vertaler</span></h2>
+      <div class="chips">
+        <button id="m0" class="active" onclick="mode(true)">Tekst → Morse</button>
+        <button id="m1" onclick="mode(false)">Morse → Tekst</button>
+      </div>
+      <textarea id="inp" rows="3" placeholder="Typ tekst, bijv. HALLO WERELD" oninput="trans()"></textarea>
+      <p class="sub" style="margin:8px 0 4px"><span class="t-result">Resultaat</span>:</p>
+      <div class="out" id="out">—</div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" onclick="playMorse(morseToPlay())">▶ <span class="t-play">Afspelen</span></button>
+        <button class="btn ghost" onclick="stopPlay()">⏹</button>
+        <button class="btn ghost" onclick="copyOut()">📋 <span class="t-copy">Kopieer</span></button>
+        <button class="btn ghost" onclick="document.getElementById('inp').value='';trans()">🗑</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>🎚 <span class="t-speed">Snelheid</span>: <span id="wpm1">18</span> WPM</h2>
+      <input type="range" min="5" max="30" value="18" oninput="setWpm(this.value)">
+    </div>
+    <div class="card">
+      <h2>⚡ <span class="t-quick">Snelle zinnen</span></h2>
+      <div class="chips" id="quick"></div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="s2" class="hidden">
+    <div class="card">
+      <h2>🎯 Quiz — <span id="qcount">1/10</span></h2>
+      <div class="chips">
+        <button class="qmode active" onclick="qmode(0,this)">Tekst→Morse</button>
+        <button class="qmode" onclick="qmode(1,this)">Morse→Tekst</button>
+        <button class="qmode" onclick="qmode(2,this)">🎧 <span class="t-listen">Luisteren</span></button>
+      </div>
+      <p class="sub">⭐ <span id="qscore">0</span> &nbsp; 🔥 <span id="qstreak">0</span></p>
+      <div class="progress"><div id="qbar" style="width:10%"></div></div>
+      <div id="qbox">
+        <div class="quiz-q" id="qq">A</div>
+        <div class="row" style="justify-content:center;margin-bottom:8px"><button class="btn ghost" id="qplay" onclick="playMorse(Q.a[1])">🔊 <span class="t-play">Afspelen</span></button></div>
+        <div class="row" id="qopts"></div>
+        <div class="feedback" id="qfb"></div>
+        <button class="btn block hidden" id="qnext" onclick="qnext()">Volgende →</button>
+      </div>
+      <div id="qdone" class="hidden" style="text-align:center">
+        <div style="font-size:3rem">🏆</div>
+        <h2 id="qfinal">8 / 10</h2>
+        <button class="btn" onclick="qreset()">🔄 <span class="t-again">Opnieuw</span></button>
+      </div>
+    </div>
+  </section>
+</main>
+<footer>Morse Leren — probeerversie van de Android-app • SOS = ... --- ...</footer>
+
+<script>
+const M = {A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.','?':'..--..','!':'-.-.--','/':'-..-.','=':'-...-','+':'.-.-.','-':'-....-','@':'.--.-.','&':'.-...',':':'---...',';':'-.-.-.','_':'..--.-'};
+const REV = {}; for (const k in M) REV[M[k]] = k;
+const LET = Object.keys(M).filter(c=>/[A-Z]/.test(c)).map(c=>[c,M[c]]);
+const NUM = Object.keys(M).filter(c=>/[0-9]/.test(c)).map(c=>[c,M[c]]);
+const PUN = Object.keys(M).filter(c=>!/[A-Z0-9]/.test(c)).map(c=>[c,M[c]]);
+let LANG='nl', WPM=18, T2M=true, cur=['A','.-'], revealed=false, Q=null, qi=0, score=0, streak=0, qm=0, answered=false;
+
+const T = {
+  nl:{app:'Morse Leren',sub:'Probeerversie — dezelfde functies als de Android-app',tabs:['Leren','Vertaler','Quiz'],sos:'3 kort, 3 lang, 3 kort. Het bekendste morsesignaal ter wereld.',play:'Afspelen',speed:'Snelheid',alpha:'Alfabet — tik om te horen',show:'Toon',trans:'Vertaler',result:'Resultaat',copy:'Kopieer',quick:'Snelle zinnen',listen:'Luisteren',again:'Opnieuw',hintT:'Typ tekst, bijv. HALLO WERELD',hintM:'Typ morse, bijv. .... . .-.. .-.. ---',good:'Goed! 🎉',bad:'Helaas! Het was',all:'Alles'},
+  en:{app:'Learn Morse',sub:'Web demo — same features as the Android app',tabs:['Learn','Translator','Quiz'],sos:'3 short, 3 long, 3 short. The most famous Morse signal in the world.',play:'Play',speed:'Speed',alpha:'Alphabet — tap to hear',show:'Show',trans:'Translator',result:'Result',copy:'Copy',quick:'Quick phrases',listen:'Listening',again:'Restart',hintT:'Type text, e.g. HELLO WORLD',hintM:'Type morse, e.g. .... . .-.. .-.. ---',good:'Correct! 🎉',bad:'Not quite! It was',all:'All'}
+};
+function setLang(l){LANG=l;document.getElementById('b-nl').className=l==='nl'?'active':'';document.getElementById('b-en').className=l==='en'?'active':'';const t=T[l];
+  document.getElementById('t-app').textContent=t.app;document.getElementById('t-sub').textContent=t.sub;
+  document.getElementById('t-tab0').textContent=t.tabs[0];document.getElementById('t-tab1').textContent=t.tabs[1];document.getElementById('t-tab2').textContent=t.tabs[2];
+  document.getElementById('t-sos').textContent=t.sos;
+  document.querySelectorAll('.t-play').forEach(e=>e.textContent=t.play);document.querySelectorAll('.t-speed').forEach(e=>e.textContent=t.speed);
+  document.querySelector('.t-alpha').textContent=t.alpha;document.querySelector('.t-show').textContent=t.show;document.querySelector('.t-trans').textContent=t.trans;
+  document.querySelector('.t-result').textContent=t.result;document.querySelector('.t-copy').textContent=t.copy;document.querySelector('.t-quick').textContent=t.quick;
+  document.querySelector('.t-listen').textContent=t.listen;document.querySelector('.t-again').textContent=t.again;
+  document.querySelector('[data-f=all]').textContent=t.all;document.getElementById('inp').placeholder=T2M?t.hintT:t.hintM;renderQuick();trans();}
+
+// --- Audio ---
+let AC=null, stopFlag=false;
+function ac(){ if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==='suspended')AC.resume(); return AC; }
+function lamp(on){document.getElementById('lamp').className='lamp'+(on?' on':'');}
+function stopPlay(){stopFlag=true;lamp(false);}
+function beep(ms){return new Promise(res=>{const c=ac(),o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=700;
+  const t=c.currentTime;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.5,t+0.01);g.gain.setValueAtTime(0.5,t+ms/1000-0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+ms/1000);
+  o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+ms/1000+0.05);lamp(true);setTimeout(()=>{lamp(false);res();},ms);});}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function playMorse(morse){stopFlag=false;const c=ac();const unit=1200/WPM;const s=morse.replace(/ \/ /g,'|').replace(/\//g,'|');
+  document.querySelectorAll('.cell.playing').forEach(e=>e.classList.remove('playing'));
+  for(const ch of s){if(stopFlag)break;
+    if(ch==='.'){await beep(unit);await wait(unit);}
+    else if(ch==='-'){await beep(unit*3);await wait(unit);}
+    else if(ch===' '||ch==='*'){await wait(unit*2);}
+    else if(ch==='|'){await wait(unit*6);}
+  }lamp(false);}
+
+// --- Tabs / grid ---
+function tab(i){[0,1,2].forEach(n=>{document.getElementById('s'+n).className=n===i?'':'hidden';document.getElementById('tab'+n).className=n===i?'active':'';});stopPlay();}
+let curFilter='all';
+function filter(f,el){curFilter=f;document.querySelectorAll('#filters button').forEach(b=>b.className='');el.className='active';renderGrid();}
+function renderGrid(){const g=document.getElementById('grid');g.innerHTML='';
+  const items=curFilter==='all'?LET.concat(NUM):curFilter==='L'?LET:curFilter==='N'?NUM:PUN;
+  items.forEach(([c,mo])=>{const d=document.createElement('div');d.className='cell';d.innerHTML='<div class="ch">'+c+'</div><div class="mo">'+mo+'</div>';
+    d.onclick=()=>{document.querySelectorAll('.cell.playing').forEach(e=>e.classList.remove('playing'));d.classList.add('playing');playMorse(mo);};g.appendChild(d);});}
+function setWpm(v){WPM=+v;document.getElementById('wpm0').textContent=v;document.getElementById('wpm1').textContent=v;}
+
+// --- Flashcards ---
+let deck=LET.concat(NUM).sort(()=>Math.random()-.5),fci=0;
+function nextFc(){fci=(fci+1)%deck.length;cur=deck[fci];revealed=false;document.getElementById('fc').textContent=cur[0];document.getElementById('fc-m').textContent='';}
+function flip(){revealed=!revealed;document.getElementById('fc-m').textContent=revealed?cur[1]:'';}
+
+// --- Translator ---
+function enc(t){return t.toUpperCase().split(' ').filter(w=>w).map(w=>w.split('').map(c=>M[c]||'').filter(x=>x).join(' ')).join(' / ');}
+function dec(m){return m.trim().replace(/ \/ /g,'|').replace(/\//g,'|').split('|').map(w=>w.trim().split(/\s+/).filter(x=>x).map(c=>REV[c]||'�').join('')).join(' ');}
+function mode(t){T2M=t;document.getElementById('m0').className=t?'active':'';document.getElementById('m1').className=t?'':'active';document.getElementById('inp').value='';document.getElementById('inp').placeholder=t?T[LANG].hintT:T[LANG].hintM;renderQuick();trans();}
+function trans(){const v=document.getElementById('inp').value;document.getElementById('out').textContent=(T2M?enc(v):dec(v))||'—';}
+function morseToPlay(){return T2M?document.getElementById('out').textContent:document.getElementById('inp').value;}
+function copyOut(){navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('out').textContent);}
+function renderQuick(){const q=document.getElementById('quick');q.innerHTML='';
+  (T2M?['SOS','HELLO','HELP','MORSE CODE','GOOD MORNING']:['... --- ...','.... . .-.. .-.. ---','.... . .-.. .--.']).forEach(p=>{const b=document.createElement('button');b.textContent=p;b.onclick=()=>{document.getElementById('inp').value=p;trans();};q.appendChild(b);});}
+
+// --- Quiz ---
+function qmode(m,el){qm=m;document.querySelectorAll('.qmode').forEach(b=>b.classList.remove('active'));el.classList.add('active');qreset();}
+function mkQ(){const pool=LET.concat(NUM);const a=pool[Math.floor(Math.random()*pool.length)];
+  const d=pool.filter(x=>x[0]!==a[0]).sort(()=>Math.random()-.5).slice(0,3);return{a:o,opts:d.concat([a]).sort(()=>Math.random()-.5)};}
+function qreset(){qi=0;score=0;streak=0;qnext_q();}
+function qnext_q(){answered=false;Q=mkQ();document.getElementById('qdone').className='hidden';document.getElementById('qbox').className='';
+  document.getElementById('qnext').className='btn block hidden';document.getElementById('qfb').textContent='';
+  document.getElementById('qcount').textContent=(qi+1)+'/10';document.getElementById('qbar').style.width=((qi+1)*10)+'%';
+  document.getElementById('qscore').textContent=score;document.getElementById('qstreak').textContent=streak;
+  const qq=document.getElementById('qq');
+  if(qm===0){qq.className='quiz-q';qq.textContent=Q.a[0];}
+  else if(qm===1){qq.className='quiz-q small';qq.textContent=Q.a[1];}
+  else{qq.className='quiz-q';qq.textContent='🎧';}
+  const box=document.getElementById('qopts');box.innerHTML='';
+  Q.opts.forEach(([c,mo])=>{const b=document.createElement('button');b.className='opt';b.style.fontSize=qm===0?'1rem':'1.4rem';b.textContent=qm===0?mo:c;
+    b.onclick=()=>{if(answered)return;answered=true;const ok=(c===Q.a[0]);
+      if(ok){score++;streak++;b.classList.add('good');}else{streak=0;b.classList.add('bad');
+        [...box.children].forEach(x=>{if((qm===0?x.textContent===Q.a[1]:x.textContent===Q.a[0]))x.classList.add('good');});}
+      document.getElementById('qscore').textContent=score;document.getElementById('qstreak').textContent=streak;
+      const fb=document.getElementById('qfb');fb.textContent=ok?'✅ '+T[LANG].good:'❌ '+T[LANG].bad+': '+Q.a[0]+' = '+Q.a[1];fb.className='feedback '+(ok?'good':'bad');
+      document.getElementById('qnext').className='btn block';};box.appendChild(b);});}
+function qnext(){qi++;if(qi>=10){document.getElementById('qbox').className='hidden';document.getElementById('qdone').className='';document.getElementById('qfinal').textContent=score+' / 10';}else qnext_q();}
+
+// init
+renderGrid();renderQuick();cur=deck[0];qreset();
+</script>
+</body>
+</html>
